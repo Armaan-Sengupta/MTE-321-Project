@@ -8,7 +8,7 @@
 %% Matlab equations
 %syms power;
 
-power = 447244;
+power = 126769;
 
 scaling_factor_gearO = 0.25;
 scaling_factor_gearC = 1;
@@ -16,12 +16,10 @@ scaling_factor_gearD = 0.75;
 
 
 speed = 76.123;
+diameter = 10;
 r_0 = 5;  %gear 0 radius
 r_d = 10; %gear 0 radius
 r_c = 10; %gear 0 radius
-
-d_0 = 1.5; %dia of shaft at gear o
-
 weight = 35;
 N_M_TO_LBF_IN = 8.851;
 Sy = 96000;
@@ -48,16 +46,15 @@ Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
 
 
 %gear o
-Moment_y = Az*6;
-Moment_z = Ay*6;
+Moment_y = Az*6
+Moment_z = Ay*6
 
-net_moment = sqrt(Moment_y^2 + Moment_z^2);
-sigma_x = 32*net_moment/(pi*d_0^3);
-tau = 16*torque_o/(pi*d_0^3);
-sigma_von_mises = sqrt(sigma_x^2 + 3*tau^2);
+net_moment = sqrt(Moment_y^2 + Moment_z^2)
+sigma_x = 32*net_moment/(pi*diameter^3)
+tau = 16*torque_o/(pi*diameter^3);
 
-%eq = sigma_von_mises == Sy;
-%disp(vpa(solve(eq,power)));
+%eq = sqrt(sigma_x^2 + 3*tau^2) == Sy;
 
+sigma_von_mises = sqrt(sigma_x^2 + 3*tau^2)
 n = Sy/sigma_von_mises
 
