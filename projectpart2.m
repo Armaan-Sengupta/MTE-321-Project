@@ -8,6 +8,9 @@
 %% Matlab equations
 %syms power;
 
+clc;
+clear all;
+
 power = 447244;
 
 scaling_factor_gearO = 0.25;
