@@ -1,18 +1,8 @@
-%% Steps To Solve For Power
-
-%% 1. Express von mises stress as function of power and reaction forces
-%%    of bearing A
-
-%% 2. Get One Big Massive Equation and then chuck everything in there bruh
-
-%% Matlab equations
-
-%syms power;
 
 clc;
 clear all;
 
-power = 170;
+power = 125034.7875;
 
 scaling_factor_gearO = 0.25;
 scaling_factor_gearC = 1;
@@ -27,7 +17,7 @@ r_c = 10; %gear 0 radius
 d_0 = 1.5; %dia of shaft at gear o
 
 weight = 35;
-N_M_TO_LBF_IN = 550;
+N_M_TO_LBF_IN = 8.851;
 Sy = 96000;
 Sut = 116;
 
@@ -45,23 +35,22 @@ Lr = Lt*tan(deg2rad(20));
 
 %gear C
 torque_c = ((scaling_factor_gearC*power)/speed)*N_M_TO_LBF_IN;
-disp(torque_c);
 Pt = torque_c/r_c;
 Pr = Pt*tan(deg2rad(20));
 
 Az = -1*(Lt*4.5 + Pt*10.5 + Ft*18)/24;
 Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
 
+
+
 %New Code
 
 function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter)
-
     Az = 1404.8;
     Ft = 736.96;
     Ay = -3.154;
     Fr = 368.48;
     Fa = 315.84;
-
     if x_position == 6
        Moment_y = Az*6;
        Moment_z = Ay*6;
@@ -70,8 +59,7 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa,
        Moment_z = -5*Fa + 330.35*0.5;
     elseif x_position == 13.5     
        Moment_y = Az*6 + (Az - Ft)*7.5;
-       Moment_z = -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);
-       
+       Moment_z = -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);       
     elseif x_position == 14
        Moment_y = Az*6 + (Az - Ft)*7.5 - 0.5*806.86;
        Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; % NEED TO CHANGE;
@@ -112,6 +100,9 @@ torque = torque_c;
 diameter = 1.875
 [sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
 [safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
+
+
+disp(safety_factor);
 
 %Gear O keyseat
 
@@ -169,7 +160,6 @@ diameter = 1.875;
 [safety_factor] = return_safetyfactor(sigma_x_geard_keyseat, tau_xy_geard_keyseat, kts, kt, notch_radius, Sy, Sut);
 
 
-disp(safety_factor);
 
 % Gear O keyseat
 %Moment_y = Az*6;
