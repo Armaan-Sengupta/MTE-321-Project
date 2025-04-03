@@ -45,26 +45,32 @@ Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
 
 %New Code
 
-function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter)
+function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position)
  
-    if x_position == 6
+    if x_position == 6.5
+        %keyseat gear 0
        Moment_y = Az*6;
        Moment_z = Ay*6;
-    elseif x_position == 6.5
+       torque = torque_o;
+    elseif x_position == 7
        Moment_y = Az*6 - 667.848*0.5;
        Moment_z = -5*Fa + 330.35*0.5;
-    elseif x_position == 13.5     
+       torque = torque_o;
+    elseif x_position == 14     
        Moment_y = Az*6 + (Az - Ft)*7.5;
-       Moment_z = -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);       
-    elseif x_position == 14
+       Moment_z = -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);
+       torque = torque_o - torque_c;
+    elseif x_position == 14.5
        Moment_y = Az*6 + (Az - Ft)*7.5 - 0.5*806.86;
-       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; % NEED TO CHANGE;
-    elseif x_position == 19.5
-       Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6;
-       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr); % NEED TO CHANGE;
-    elseif x_position == 20
+       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; 
+       torque = torque_o - torque_c;
+   elseif x_position == 19.5
        Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6 - 1910.79*0.5;
-       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr) + 0.5*125.7; 
+       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr); 
+    elseif x_position == 20
+       Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6;
+       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr);
+       torque = torque_o - torque_c;
     end
     
     net_moment = sqrt(Moment_y^2 + Moment_z^2);
