@@ -50,26 +50,26 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position)
     if x_position == 6.5
         %keyseat gear 0
        Moment_y = Az*6;
-       Moment_z = Ay*6;
+       Moment_z = Ay*6 + Ay*6;
        torque = torque_o;
     elseif x_position == 7
        Moment_y = Az*6 - 667.848*0.5;
-       Moment_z = -5*Fa + 330.35*0.5;
+       Moment_z = Ay*6 + -5*Fa + 330.35*0.5;
        torque = torque_o;
     elseif x_position == 14     
        Moment_y = Az*6 + (Az - Ft)*7.5;
-       Moment_z = -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);
+       Moment_z = Ay*6 + -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);
        torque = torque_o - torque_c;
     elseif x_position == 14.5
        Moment_y = Az*6 + (Az - Ft)*7.5 - 0.5*806.86;
-       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; 
+       Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; 
        torque = torque_o - torque_c;
    elseif x_position == 19.5
        Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6 - 1910.79*0.5;
-       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr); 
+       Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr); 
     elseif x_position == 20
        Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6;
-       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr);
+       Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr);
        torque = torque_o - torque_c;
     end
     
