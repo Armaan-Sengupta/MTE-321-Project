@@ -71,7 +71,7 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
        Moment_y = -1*(Az*6 + (Az - Ft)*7.5 - 0.5*806.86);
        Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; 
        torque = torque_o - torque_c;
-   elseif x_position == 19.5
+    elseif x_position == 19.5
        Moment_y = -1*(Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*5.5);
        Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) + 5.5*(Ay - weight + Fr - Pr - weight); 
     elseif x_position == 20
@@ -80,8 +80,8 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
        torque = torque_o - torque_c;
     end
     
-    disp(Moment_y);
-    disp(Moment_z);
+    Moment_y
+    Moment_z
     net_moment = sqrt(Moment_y^2 + Moment_z^2);
     sigma_x = 32*net_moment/(pi*diameter^3);
     tau_xy = 16*torque/(pi*diameter^3);
@@ -103,7 +103,7 @@ end
 
 %Gear C keyseat
 
-x_position = 13.5;
+x_position = 14;
 kt = 2.14;
 kts = 3.0;
 notch_radius = 0.0375;
