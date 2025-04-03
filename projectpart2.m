@@ -1,7 +1,7 @@
 
 clc;
 clear all;
-global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight;
+global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight Sy Sut;
 
 power = 126769;
 
@@ -19,7 +19,7 @@ d_0 = 1.5; %dia of shaft at gear o
 weight = 35;
 N_M_TO_LBF_IN = 8.851;
 Sy = 96000;
-Sut = 116;
+Sut = 116000;
 
 %gear 0
 torque_o = ((scaling_factor_gearO*power)/speed)*N_M_TO_LBF_IN;
@@ -42,10 +42,6 @@ Az = -1*(Lt*4.5 + Pt*10.5 + Ft*18)/24;
 Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
 
 %New Code
-disp("Force")
-disp(Ft);
-disp('Force2')
-disp(Fr);
 
 function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
     global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight;
@@ -53,7 +49,6 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
     Moment_y = 0;
     Moment_z = 0;
     torque = 0;
-    disp("Moments")
    
     if x_position == 6.5
         %keyseat gear 0
@@ -74,7 +69,7 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
        torque = torque_o - torque_c;
     elseif x_position == 19.5
        Moment_y = (Az*6 + (Az + Ft)*7.5 + (Az + Ft + Pt)*5.5);
-       Moment_z = -1*Ay*6 - 5*Fa + 7.5*(-1*Ay - weight + Fr) + 5.5*(-1*Ay - weight + Fr - Pr - weight)
+       Moment_z = -1*Ay*6 - 5*Fa + 7.5*(-1*Ay - weight + Fr) + 5.5*(-1*Ay - weight + Fr - Pr - weight);
        torque = torque_o - torque_c;
 
     elseif x_position == 20
@@ -84,99 +79,108 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
        
     end
     
-    Moment_y
-    Moment_z
     net_moment = sqrt(Moment_y^2 + Moment_z^2);
-    sigma_x = 32*net_moment/(pi*diameter^3);
-    tau_xy = 16*torque/(pi*diameter^3);
+    sigma_x = abs(32*net_moment/(pi*diameter^3));
+    tau_xy = abs(16*torque/(pi*diameter^3));
     
 end
 
 
-function [safety_factor] = return_safetyfactor(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut)    
+function [safety_factor] = return_safetyfactor_yield(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut) 
+    Sut = Sut/1000;
     root_a_q = 0.2456 - 3.08*1e-3*Sut + 1.51*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
     root_a_qs = 0.19 - 2.51*1e-3*Sut + 1.35*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
-    
+    Sut = Sut*1000;
+
     q = 1/(1 + root_a_q/sqrt(notch_radius));
     qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
-    kf = 1 + q*(kt - 1)
-    kfs = 1 + qs*(kts - 1)
+    kf = 1 + q*(kt - 1);
+    kfs = 1 + qs*(kts - 1);
     von_mises_stress = sqrt((kf*sigma_x)^2 + 3*(kfs*tau_xy)^2);
     safety_factor = Sy / von_mises_stress;
 end
 
-%Gear C keyseat
+
+function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut, diameter)
+    Sut = Sut/1000;
+    root_a_q = 0.2456 - 3.08*1e-3*Sut + 1.51*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
+    root_a_qs = 0.19 - 2.51*1e-3*Sut + 1.35*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
+
+    Sut = Sut*1000;
+    
+    q = 1/(1 + root_a_q/sqrt(notch_radius));
+    qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
+    kf = 1 + q*(kt - 1);
+    kfs = 1 + qs*(kts - 1);
+
+    Se = 0.7661*0.879*0.5*Sut*(diameter^-0.107);
+    SigmaA_ = kf*sigma_x;
+    SigmaM_ = kfs*tau_xy*sqrt(3);
+    safety_factor = 1 / (SigmaM_ / Sut + SigmaA_ / Se);
+end
+
+global x_position kt kts notch_radius diameter
+
+function dispSafety(label)
+    global x_position kt kts notch_radius diameter Sy Sut;
+    
+    fprintf('%s\n', label);
+    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position,diameter);
+    sigma_x = abs(sigma_x);
+    tau_xy = abs(tau_xy);
+    safety_factor_yield = return_safetyfactor_yield(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut);
+    safety_factor_goodman = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut,diameter);
+    fprintf("Safety Factor Yield: %.4f\n",safety_factor_yield);
+    fprintf("Safety Factor Fatigue: %.4f\n",safety_factor_goodman);
+    fprintf('-----------------\n');
+end
 
 x_position = 14;
 kt = 2.14;
 kts = 3.0;
 notch_radius = 0.0375;
 diameter = 1.875;
-[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position,diameter);
-[safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
+dispSafety("Gear C Keyseat");
 
-
-
-%Gear O keyseat
 
 x_position = 6.5;
 kt = 2.14;
 kts = 3.0;
 notch_radius = 0.03;
-torque = torque_o;
 diameter = 1.5;
-[sigma_x_gearo_keyseat, tau_xy_gearo_keyseat] = return_sigmax_tauxy(x_position,diameter);
-[safety_factor] = return_safetyfactor(sigma_x_gearo_keyseat, tau_xy_gearo_keyseat, kts, kt, notch_radius, Sy, Sut);
+dispSafety("Gear O Keyseat");
 
-
-%Gear D keyseat
 
 x_position = 20;
 kt = 2.14;
 kts = 3.0;
 notch_radius = 0.0375;
-torque = torque_d;
 diameter = 1.875;
-[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, diameter);
-[safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
+dispSafety("Gear D Keyseat");
 
-disp("SAFETY");
-disp(safety_factor);
-%Gear C shoulder fillet
+
 
 x_position = 14;
 kt = 2.05;  % Rough Approximation: Need to change to be more accurate
 kts = 1.6; % Rough Approximation: Need to change to be more accurate
 notch_radius = 0.09375;
-torque = torque_c;
 diameter = 1.875;
-[sigma_x_gearc_shoulderfillet, tau_xy_gearc_shoulderfillet] = return_sigmax_tauxy(x_position, diameter);
-[safety_factor] = return_safetyfactor(sigma_x_gearc_shoulderfillet, tau_xy_gearc_shoulderfillet, kts, kt, notch_radius, Sy, Sut);
-
-%Gear O shoulder fillet
+dispSafety("Gear C Shoulder Fillet");
 
 x_position = 7;
 kt = 2.1; % Rough Approximation: Need to change to be more accurate
 kts = 1.625; % Rough Approximation: Need to change to be more accurate
 notch_radius = 0.075;
-torque = torque_o;
 diameter = 1.5;
-[sigma_x_gearo_shoulderfillet, tau_xy_gearo_shoulderfillet] = return_sigmax_tauxy(x_position, diameter);
-[safety_factor] = return_safetyfactor(sigma_x_gearo_shoulderfillet, tau_xy_gearo_shoulderfillet, kts, kt, notch_radius, Sy, Sut);
+dispSafety("Gear O Shoulder Fillet");
 
-%Gear D shoulder fillet
 
 x_position = 19.5;
 kt = 2.05;  % Rough Approximation: Need to change to be more accurate
 kts = 1.6; % Rough Approximation: Need to change to be more accurate
 notch_radius = 0.09375;
-torque = torque_d;
 diameter = 1.875;
-[sigma_x_geard_keyseat, tau_xy_geard_keyseat] = return_sigmax_tauxy(x_position, diameter);
-[safety_factor] = return_safetyfactor(sigma_x_geard_keyseat, tau_xy_geard_keyseat, kts, kt, notch_radius, Sy, Sut);
-
-disp("SAFETY");
-disp(safety_factor);
+dispSafety("Gear D Shoulder Fillet");
 
 
 % Gear O keyseat
