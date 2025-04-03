@@ -1,12 +1,14 @@
 
 clc;
 clear all;
+global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight;
 
 power = 125034.7875;
 
 scaling_factor_gearO = 0.25;
 scaling_factor_gearC = 1;
 scaling_factor_gearD = 0.75;
+
 
 
 speed = 76.123;
@@ -46,10 +48,12 @@ Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
 %New Code
 
 function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
+    global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight;
+    
     Moment_y = 0;
     Moment_z = 0;
     torque = 0;
-    
+
     if x_position == 6.5
         %keyseat gear 0
        Moment_y = -1*(Az*6);
