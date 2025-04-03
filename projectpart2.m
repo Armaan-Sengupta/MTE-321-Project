@@ -46,11 +46,7 @@ Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
 %New Code
 
 function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter)
-    Az = 1404.8;
-    Ft = 736.96;
-    Ay = -3.154;
-    Fr = 368.48;
-    Fa = 315.84;
+ 
     if x_position == 6
        Moment_y = Az*6;
        Moment_z = Ay*6;
@@ -96,7 +92,7 @@ x_position = 13.5;
 kt = 2.14;
 kts = 3.0;
 notch_radius = 0.0375;
-torque = torque_c;
+torque = torque_o - torque_c;
 diameter = 1.875
 [sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
 [safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
