@@ -28,8 +28,8 @@ d_0 = 1.5; %dia of shaft at gear o
 
 weight = 35;
 N_M_TO_LBF_IN = 8.851;
-Sy = 96;
-Sut = 116000;
+Sy = 96000;
+Sut = 116;
 
 %gear 0
 torque_o = ((scaling_factor_gearO*power)/speed)*N_M_TO_LBF_IN;
@@ -62,8 +62,14 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa,
        Moment_y = Az*6 - 667.848*0.5;
        Moment_z = -5*Fa + 330.35*0.5;
     elseif x_position == 13.5
+       Az = 1404.8;
+       Ft = 736.96;
+       Ay = -3.154;
+       Fr = 368.48;
+       Fa = 315.84;
        Moment_y = Az*6 + (Az - Ft)*7.5;
-       Moment_z = -5*Fa + 7.5*(Ay - weight + Fr);
+       Moment_z = -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);
+       
     elseif x_position == 14
        Moment_y = Az*6 + (Az - Ft)*7.5 - 0.5*806.86;
        Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; % NEED TO CHANGE;
@@ -74,23 +80,27 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa,
        Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6 - 1910.79*0.5;
        Moment_z = -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr) + 0.5*125.7; 
     end
+    
     net_moment = sqrt(Moment_y^2 + Moment_z^2);
     sigma_x = 32*net_moment/(pi*diameter^3);
+    disp(torque);
     tau_xy = 16*torque/(pi*diameter^3);
+    
 end
 
 
 function [safety_factor] = return_safetyfactor(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut)    
-    root_a_q = 0.2456 - 3.08*1e-3*Sut + 1.51*10e-5*Sut^2 - 2.67*10e-8*Sut^3;
-    root_a_qs = 0.19 - 2.51*1e-3*Sut + 1.35*10e-5*Sut^2 - 2.67*10e-8*Sut^3;
+    root_a_q = 0.2456 - 3.08*1e-3*Sut + 1.51*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
+    root_a_qs = 0.19 - 2.51*1e-3*Sut + 1.35*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
     
     q = 1/(1 + root_a_q/sqrt(notch_radius));
     qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
     kf = 1 + q*(kt - 1);
     kfs = 1 + qs*(kts - 1);
+    disp(kfs);
     von_mises_stress = sqrt((kf*sigma_x)^2 + 3*(kfs*tau_xy)^2);
-    disp(Sy);
-    disp(von_mises_stress);
+    disp(kf*sigma_x);
+    disp(kfs*tau_xy);
     safety_factor = Sy / von_mises_stress;
 end
 
@@ -99,13 +109,12 @@ end
 x_position = 13.5;
 kt = 2.14;
 kts = 3.0;
-notch_radius = 0.09375;
+notch_radius = 0.0375;
 torque = torque_c;
-[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, 20);
+[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, 11054, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, 1.875);
 [safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
+
 disp(safety_factor);
-
-
 
 % Gear O keyseat
 %Moment_y = Az*6;
