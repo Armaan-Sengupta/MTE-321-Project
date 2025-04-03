@@ -45,34 +45,39 @@ Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
 
 %New Code
 
-function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position)
- 
+function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
+    Moment_y = 0;
+    Moment_z = 0;
+    torque = 0;
+    
     if x_position == 6.5
         %keyseat gear 0
-       Moment_y = Az*6;
+       Moment_y = -1*(Az*6);
        Moment_z = Ay*6;
        torque = torque_o;
     elseif x_position == 7
-       Moment_y = Az*6 - 667.848*0.5;
+       Moment_y = -1*(Az*6 - 667.848*0.5);
        Moment_z = Ay*6 + -5*Fa + 330.35*0.5;
        torque = torque_o;
     elseif x_position == 14     
-       Moment_y = Az*6 + (Az - Ft)*7.5;
+       Moment_y = -1*(Az*6 + (Az - Ft)*7.5);
        Moment_z = Ay*6 + -5*Fa + Ay*6 + 7.5*(Ay - weight + Fr);
        torque = torque_o - torque_c;
     elseif x_position == 14.5
-       Moment_y = Az*6 + (Az - Ft)*7.5 - 0.5*806.86;
+       Moment_y = -1*(Az*6 + (Az - Ft)*7.5 - 0.5*806.86);
        Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) - 241.10416*0.5; 
        torque = torque_o - torque_c;
    elseif x_position == 19.5
-       Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6 - 1910.79*0.5;
-       Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr); 
+       Moment_y = -1*(Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*5.5);
+       Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) + 5.5*(Ay - weight + Fr - Pr - weight); 
     elseif x_position == 20
-       Moment_y = Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6;
-       Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) - 6*(Ay - weight + Fr + Pr);
+       Moment_y = -1*(Az*6 + (Az - Ft)*7.5 - (Az - Ft - Pt)*6);
+       Moment_z = Ay*6 + -5*Fa + 7.5*(Ay - weight + Fr) + 6*(Ay - weight + Fr - Pr - weight);
        torque = torque_o - torque_c;
     end
     
+    disp(Moment_y);
+    disp(Moment_z);
     net_moment = sqrt(Moment_y^2 + Moment_z^2);
     sigma_x = 32*net_moment/(pi*diameter^3);
     tau_xy = 16*torque/(pi*diameter^3);
@@ -98,9 +103,8 @@ x_position = 13.5;
 kt = 2.14;
 kts = 3.0;
 notch_radius = 0.0375;
-torque = torque_o - torque_c;
-diameter = 1.875
-[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
+diameter = 1.875;
+[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position,diameter);
 [safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
 
 
@@ -114,7 +118,7 @@ kts = 3.0;
 notch_radius = 0.03;
 torque = torque_o;
 diameter = 1.5;
-[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
+[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position,diameter);
 [safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
 
 %Gear D keyseat
@@ -125,7 +129,7 @@ kts = 3.0;
 notch_radius = 0.0375;
 torque = torque_d;
 diameter = 1.875;
-[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
+[sigma_x_gearc_keyseat, tau_xy_gearc_keyseat] = return_sigmax_tauxy(x_position, diameter);
 [safety_factor] = return_safetyfactor(sigma_x_gearc_keyseat, tau_xy_gearc_keyseat, kts, kt, notch_radius, Sy, Sut);
 
 %Gear C shoulder fillet
@@ -136,7 +140,7 @@ kts = 3.0; % Rough Approximation: Need to change to be more accurate
 notch_radius = 0.0375;
 torque = torque_c;
 diameter = 1.875;
-[sigma_x_gearc_shoulderfillet, tau_xy_gearc_shoulderfillet] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
+[sigma_x_gearc_shoulderfillet, tau_xy_gearc_shoulderfillet] = return_sigmax_tauxy(x_position, diameter);
 [safety_factor] = return_safetyfactor(sigma_x_gearc_shoulderfillet, tau_xy_gearc_shoulderfillet, kts, kt, notch_radius, Sy, Sut);
 
 %Gear O shoulder fillet
@@ -147,7 +151,7 @@ kts = 3.0; % Rough Approximation: Need to change to be more accurate
 notch_radius = 0.03;
 torque = torque_o;
 diameter = 1.5;
-[sigma_x_gearo_shoulderfillet, tau_xy_gearo_shoulderfillet] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
+[sigma_x_gearo_shoulderfillet, tau_xy_gearo_shoulderfillet] = return_sigmax_tauxy(x_position, diameter);
 [safety_factor] = return_safetyfactor(sigma_x_gearo_shoulderfillet, tau_xy_gearo_shoulderfillet, kts, kt, notch_radius, Sy, Sut);
 
 %Gear D shoulder fillet
@@ -158,7 +162,7 @@ kts = 3.0; % Rough Approximation: Need to change to be more accurate
 notch_radius = 0.0375;
 torque = torque_d;
 diameter = 1.875;
-[sigma_x_geard_keyseat, tau_xy_geard_keyseat] = return_sigmax_tauxy(x_position, torque, Az, Ay, Fa, Ft, Fr, Pt, Pr, weight, diameter);
+[sigma_x_geard_keyseat, tau_xy_geard_keyseat] = return_sigmax_tauxy(x_position, diameter);
 [safety_factor] = return_safetyfactor(sigma_x_geard_keyseat, tau_xy_geard_keyseat, kts, kt, notch_radius, Sy, Sut);
 
 
