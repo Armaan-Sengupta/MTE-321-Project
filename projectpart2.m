@@ -50,7 +50,7 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position)
     if x_position == 6.5
         %keyseat gear 0
        Moment_y = Az*6;
-       Moment_z = Ay*6 + Ay*6;
+       Moment_z = Ay*6;
        torque = torque_o;
     elseif x_position == 7
        Moment_y = Az*6 - 667.848*0.5;
