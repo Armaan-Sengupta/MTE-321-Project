@@ -112,8 +112,8 @@ function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt,
     
     q = 1/(1 + root_a_q/sqrt(notch_radius));
     qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
-    kf = 1 + q*(kt - 1);
-    kfs = 1 + qs*(kts - 1);
+    kf = 1 + q*(kt - 1)
+    kfs = 1 + qs*(kts - 1)
 
     ka = 2.7*(Sut/1000)^-0.265;
     ke = 0.753;
@@ -123,9 +123,9 @@ function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt,
     end
     
 
-    Se = ka*kb*ke*0.5*Sut;
-    SigmaA_ = kf*sigma_x;
-    SigmaM_ = kfs*tau_xy*sqrt(3);
+    Se = ka*kb*ke*0.5*Sut
+    SigmaA_ = kf*sigma_x
+    SigmaM_ = kfs*tau_xy*sqrt(3)
     safety_factor = 1 / (SigmaM_ / Sut + SigmaA_ / Se);
 end
 
@@ -170,22 +170,22 @@ dispSafety("Gear D Keyseat");
 
 
 x_position = 14;
-kt = 2.1;  
+kt = 1.9;  
 kts = 1.6;
 diameter = 1.25 * master_Dia;
 notch_radius = 0.05*diameter;
 dispSafety("Gear C Shoulder Fillet");
 
 x_position = 7;
-kt = 2.1; % Rough Approximation: Need to change to be more accurate
+kt = 1.95; % Rough Approximation: Need to change to be more accurate
 kts = 1.625; % Rough Approximation: Need to change to be more accurate
-diameter = master_Dia
-notch_radius = 0.05*diameter
+diameter = master_Dia;
+notch_radius = 0.05*diameter;
 dispSafety("Gear O Shoulder Fillet");
 
 
 x_position = 19.5;
-kt = 2.05;  % Rough Approximation: Need to change to be more accurate
+kt = 1.9;  % Rough Approximation: Need to change to be more accurate
 kts = 1.6; % Rough Approximation: Need to change to be more accurate
 diameter = 1.25 * master_Dia;
 notch_radius = 0.05*diameter;
@@ -214,7 +214,7 @@ dispSafety("Gear D Shoulder Fillet");
 
 
 
-
+if (false)
 
 % Diameter Convergence
 % Calculation----------------------------------------------------------
@@ -304,3 +304,4 @@ xlabel('Iteration Number');
 ylabel('Safety Factor');
 title('Safety Factor Convergence (Gear O Shoulder)');
 grid on;
+end
