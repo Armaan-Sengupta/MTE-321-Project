@@ -1,0 +1,36 @@
+clear all;
+clc;
+
+function d = evaluate_equation(ma, tm, d_, Kf, Kfs)
+    % Equation parameters
+    factor1 = (16 * 2) / pi;
+    
+    % First term inside the brackets
+    term1 = (2 * Kf * d_ * ma) / (29.41 * (d_^(-0.107)));
+    
+    % Second term inside the brackets
+    term2 = (sqrt(3) * Kfs * d_ * tm) / 116;
+    
+    % Combine terms and evaluate the final expression
+    d =  (factor1 *(term1 + term2))^(1/3);
+end
+
+d_ = 1.5;   % Replace with actual value
+ma = 8879.6;   % Replace with actual value
+tm = 3684.9;   % Replace with actual value
+kt = 2.1; % Rough Approximation: Need to change to be more accurate
+kts = 1.625; % Rough Approximation: Need to change to be more accurate
+notch_radius = 0.05*d;
+
+Sut = 116;
+Se = 0.7661*0.879*0.753*0.5*Sut*(d_^)
+root_a_q = 0.2456 - 3.08*1e-3*Sut + 1.51*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
+root_a_qs = 0.19 - 2.51*1e-3*Sut + 1.35*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
+
+
+q = 1/(1 + root_a_q/sqrt(notch_radius));
+qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
+kf = 1 + q*(kt - 1)
+kfs = 1 + qs*(kts - 1)
+
+result = evaluate_equation(ma, tm, d_, kf, kfs)

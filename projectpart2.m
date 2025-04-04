@@ -4,6 +4,7 @@ clear all;
 global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight Sy Sut;
 
 power = 126769;
+master_Dia = 2.415;
 
 scaling_factor_gearO = 0.25;
 scaling_factor_gearC = 1;
@@ -14,7 +15,7 @@ r_0 = 5;  %gear 0 radius
 r_d = 10; %gear 0 radius
 r_c = 10; %gear 0 radius
 
-d_0 = 1.5; %dia of shaft at gear o
+d_0 = 1.5; %dia of shaft at gear o (for max power only)
 
 weight = 35;
 N_M_TO_LBF_IN = 8.851;
@@ -147,47 +148,47 @@ end
 x_position = 14;
 kt = 2.14;
 kts = 3.0;
-notch_radius = 0.0375;
-diameter = 1.875;
+diameter = 1.25*master_Dia;
+notch_radius = 0.02*diameter;
 dispSafety("Gear C Keyseat");
 
 
 x_position = 6.5;
 kt = 2.14;
 kts = 3.0;
-notch_radius = 0.03;
-diameter = 1.5;
+diameter = master_Dia;
+notch_radius = 0.02*diameter;
 dispSafety("Gear O Keyseat");
 
 
 x_position = 20;
 kt = 2.14;
 kts = 3.0;
-notch_radius = 0.0375;
-diameter = 1.875;
+diameter = 1.25 * master_Dia;
+notch_radius = 0.02*diameter;
 dispSafety("Gear D Keyseat");
 
 
 x_position = 14;
 kt = 2.1;  
 kts = 1.6;
-notch_radius = 0.09375;
-diameter = 1.875;
+diameter = 1.25 * master_Dia;
+notch_radius = 0.05*diameter;
 dispSafety("Gear C Shoulder Fillet");
 
 x_position = 7;
 kt = 2.1; % Rough Approximation: Need to change to be more accurate
 kts = 1.625; % Rough Approximation: Need to change to be more accurate
-notch_radius = 0.075;
-diameter = 1.5;
+diameter = master_Dia;
+notch_radius = 0.05*diameter;
 dispSafety("Gear O Shoulder Fillet");
 
 
 x_position = 19.5;
 kt = 2.05;  % Rough Approximation: Need to change to be more accurate
 kts = 1.6; % Rough Approximation: Need to change to be more accurate
-notch_radius = 0.09375;
-diameter = 1.875;
+diameter = 1.25 * master_Dia;
+notch_radius = 0.05*diameter;
 dispSafety("Gear D Shoulder Fillet");
 
 
