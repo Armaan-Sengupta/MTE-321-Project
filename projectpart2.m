@@ -52,14 +52,14 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
    
     if x_position == 6.5
         %keyseat gear o
-       Moment_y = (Az*6)
-       Moment_z = -Ay*6 -5*Fa
-       torque = torque_o
+       Moment_y = (Az*6);
+       Moment_z = -Ay*6 -5*Fa;
+       torque = torque_o;
     elseif x_position == 7
         %shoulder gear o
-       Moment_y = (Az*6 - 667.848*0.5)
-       Moment_z = -Ay*6 + -5*Fa + 330.35*0.5
-       torque = torque_o
+       Moment_y = (Az*6 - 667.848*0.5);
+       Moment_z = -Ay*6 + -5*Fa + 330.35*0.5;
+       torque = torque_o;
     elseif x_position == 14     
        Moment_y = (Az*6 + (Az + Ft)*7.5);
        Moment_z = -1*Ay*6 - 5*Fa + 7.5*(-1*Ay - weight + Fr);
@@ -120,10 +120,11 @@ function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt,
     if (diameter < 2) kb = 0.879*(diameter^-0.107);
     else kb = 0.910*(diameter^-0.157);
     end
+    
 
-    Se = ka*kb*ke*0.5*Sut
-    SigmaA_ = kf*sigma_x
-    SigmaM_ = kfs*tau_xy*sqrt(3)
+    Se = ka*kb*ke*0.5*Sut;
+    SigmaA_ = kf*sigma_x;
+    SigmaM_ = kfs*tau_xy*sqrt(3);
     safety_factor = 1 / (SigmaM_ / Sut + SigmaA_ / Se);
 end
 
@@ -133,11 +134,11 @@ function dispSafety(label)
     global x_position kt kts notch_radius diameter Sy Sut;
     
     fprintf('%s\n', label);
-    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position,diameter)
+    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position,diameter);
     sigma_x = abs(sigma_x);
     tau_xy = abs(tau_xy);
     safety_factor_yield = return_safetyfactor_yield(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut);
-    safety_factor_goodman = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut,diameter)
+    safety_factor_goodman = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut,diameter);
     fprintf("Safety Factor Yield: %.4f\n",safety_factor_yield);
     fprintf("Safety Factor Fatigue: %.4f\n",safety_factor_goodman);
     fprintf('-----------------\n');
