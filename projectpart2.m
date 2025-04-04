@@ -145,6 +145,74 @@ function dispSafety(label)
     fprintf('-----------------\n');
 end
 
+function get_max_power()
+    syms power1
+    master_Dia = 1.5;
+    
+    scaling_factor_gearO = 0.25;
+    scaling_factor_gearC = 1;
+    scaling_factor_gearD = 0.75;
+    
+    speed = 76.123;
+    r_0 = 5;  %gear 0 radius
+    r_d = 10; %gear 0 radius
+    r_c = 10; %gear 0 radius
+    
+    d_0 = 1.5; %dia of shaft at gear o (for max power only)
+    
+    weight = 35;
+    N_M_TO_LBF_IN = 8.851;
+    Sy = 96000;
+    Sut = 116000;
+
+    torque_o = ((scaling_factor_gearO*power1)/speed)*N_M_TO_LBF_IN;
+ 
+    Ft = torque_o/r_0;
+    Fr = (7/14)*Ft;
+    Fa = (6/14)*Ft;
+    
+    %gear D
+    torque_d = ((scaling_factor_gearD*power1)/speed)*N_M_TO_LBF_IN;
+    Lt = torque_d/r_d;
+    Lr = Lt*tan(deg2rad(20));
+    
+    
+    %gear C
+    torque_c = ((scaling_factor_gearC*power1)/speed)*N_M_TO_LBF_IN;
+    Pt = torque_c/r_c;
+    Pr = Pt*tan(deg2rad(20));
+    
+    Az = -1*(Lt*4.5 + Pt*10.5 + Ft*18)/24;
+    Ay = -1*((Lr - weight)*-4.5 + (Pr + weight)*10.5 + (Fr - weight)*-18 + Fa*5)/24;
+   
+    Moment_y = (Az*6 + (Az + Ft)*7.5);
+    Moment_z = -1*Ay*6 - 5*Fa + 7.5*(-1*Ay - weight + Fr);
+    kt = 2.14;
+    kts = 3.0;
+    notch_radius = 0.03;
+    torque = torque_o - torque_c;
+    diameter = 1.5;
+    net_moment = sqrt(Moment_y.^2 + Moment_z.^2);
+    sigma_x = 32*net_moment/(pi*diameter^3);
+    tau_xy = 16*torque/(pi*diameter^3);
+    
+    
+    root_a_q = 0.2456 - 3.08*1e-3*Sut + 1.51*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
+    root_a_qs = 0.19 - 2.51*1e-3*Sut + 1.35*1e-5*Sut^2 - 2.67*1e-8*Sut^3;
+     
+    q = 1/(1 + root_a_q/sqrt(notch_radius));
+    qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
+    kf = 1 + q*(kt - 1);
+    kfs = 1 + qs*(kts - 1);
+    von_mises_stress = sqrt((kf*sigma_x).^2 + 3*(kfs*tau_xy).^2); 
+    eq = von_mises_stress == Sy;
+    disp("Max Power is Postive Version of Following: ")
+    disp(vpa(solve(eq,power1)));
+end
+
+get_max_power();
+
+
 x_position = 14.5;
 kt = 2.14;
 kts = 3.0;
