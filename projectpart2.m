@@ -113,9 +113,16 @@ function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt,
     kf = 1 + q*(kt - 1);
     kfs = 1 + qs*(kts - 1);
 
-    Se = 0.7661*0.879*0.5*Sut*(diameter^-0.107);
-    SigmaA_ = kf*sigma_x;
-    SigmaM_ = kfs*tau_xy*sqrt(3);
+    ka = 2.7*(Sut/1000)^-0.265;
+    ke = 0.753;
+    kb = 0;
+    if (diameter < 2) kb = 0.879*(diameter^-0.107);
+    else kb = 0.910*(diameter^-0.157);
+    end
+
+    Se = ka*kb*ke*0.5*Sut
+    SigmaA_ = kf*sigma_x
+    SigmaM_ = kfs*tau_xy*sqrt(3)
     safety_factor = 1 / (SigmaM_ / Sut + SigmaA_ / Se);
 end
 
@@ -125,11 +132,11 @@ function dispSafety(label)
     global x_position kt kts notch_radius diameter Sy Sut;
     
     fprintf('%s\n', label);
-    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position,diameter);
+    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position,diameter)
     sigma_x = abs(sigma_x);
     tau_xy = abs(tau_xy);
     safety_factor_yield = return_safetyfactor_yield(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut);
-    safety_factor_goodman = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut,diameter);
+    safety_factor_goodman = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut,diameter)
     fprintf("Safety Factor Yield: %.4f\n",safety_factor_yield);
     fprintf("Safety Factor Fatigue: %.4f\n",safety_factor_goodman);
     fprintf('-----------------\n');
@@ -159,10 +166,9 @@ diameter = 1.875;
 dispSafety("Gear D Keyseat");
 
 
-
 x_position = 14;
-kt = 2.05;  % Rough Approximation: Need to change to be more accurate
-kts = 1.6; % Rough Approximation: Need to change to be more accurate
+kt = 2.1;  
+kts = 1.6;
 notch_radius = 0.09375;
 diameter = 1.875;
 dispSafety("Gear C Shoulder Fillet");

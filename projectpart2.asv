@@ -80,8 +80,8 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
     end
     
     net_moment = sqrt(Moment_y^2 + Moment_z^2);
-    sigma_x = 32*net_moment/(pi*diameter^3);
-    tau_xy = 16*torque/(pi*diameter^3);
+    sigma_x = abs(32*net_moment/(pi*diameter^3));
+    tau_xy = abs(16*torque/(pi*diameter^3));
     
 end
 
@@ -112,10 +112,15 @@ function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt,
     qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
     kf = 1 + q*(kt - 1);
     kfs = 1 + qs*(kts - 1);
-
-    Se = 0.7661*0.879*0.5*Sut*(diameter^-0.107);
-    SigmaA_ = kf*sigma_x;
-    SigmaM_ = kfs*tau_xy*sqrt(3);
+    
+    ka = 2.7*(Sut/1000)^-0.265;
+    kf = 0;
+    if (diameter < 2) kf = 0.879*(diameter^-0.107);
+    else kf = 0.910*(diameter^-0.157);
+    end
+    Se = ka*kf*0.5*Sut;
+    SigmaA_ = kf*sigma_x
+    SigmaM_ = kfs*tau_xy*sqrt(3)
     safety_factor = 1 / (SigmaM_ / Sut + SigmaA_ / Se);
 end
 
@@ -125,11 +130,11 @@ function dispSafety(label)
     global x_position kt kts notch_radius diameter Sy Sut;
     
     fprintf('%s\n', label);
-    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position,diameter);
+    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position,diameter)
     sigma_x = abs(sigma_x);
     tau_xy = abs(tau_xy);
     safety_factor_yield = return_safetyfactor_yield(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut);
-    safety_factor_goodman = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut,diameter);
+    safety_factor_goodman = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut,diameter)
     fprintf("Safety Factor Yield: %.4f\n",safety_factor_yield);
     fprintf("Safety Factor Fatigue: %.4f\n",safety_factor_goodman);
     fprintf('-----------------\n');
@@ -159,10 +164,9 @@ diameter = 1.875;
 dispSafety("Gear D Keyseat");
 
 
-
 x_position = 14;
-kt = 2.05;  % Rough Approximation: Need to change to be more accurate
-kts = 1.6; % Rough Approximation: Need to change to be more accurate
+kt = 2.1;  
+kts = 1.6;
 notch_radius = 0.09375;
 diameter = 1.875;
 dispSafety("Gear C Shoulder Fillet");
