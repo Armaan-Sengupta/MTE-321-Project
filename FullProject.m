@@ -206,8 +206,10 @@ function get_max_power()
     kfs = 1 + qs*(kts - 1);
     von_mises_stress = sqrt((kf*sigma_x).^2 + 3*(kfs*tau_xy).^2); 
     eq = von_mises_stress == Sy;
-    disp("Max Power is Postive Version of Following: ")
-    disp(vpa(solve(eq,power1)));
+
+    solutions = vpa(solve(eq, power1));
+    positive_solutions = solutions(solutions > 0);
+    fprintf("Max Power is: %.3fW\n", positive_solutions);
 end
 
 get_max_power();

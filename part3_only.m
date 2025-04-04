@@ -1,6 +1,9 @@
 clear all;
 clc;
 
+%Alternative way to do part 3 using solved diameter equation leading to
+%optimized convergance
+
 % Define the function to evaluate the diameter
 function d = evaluate_equation(ma, tm, Kf, Kfs, Se, Sut)
     % Equation parameters
