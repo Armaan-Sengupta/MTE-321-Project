@@ -51,14 +51,15 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
     torque = 0;
    
     if x_position == 6.5
-        %keyseat gear 0
-       Moment_y = (Az*6);
-       Moment_z = -Ay*6;
-       torque = torque_o;
+        %keyseat gear o
+       Moment_y = (Az*6)
+       Moment_z = -Ay*6 -5*Fa
+       torque = torque_o
     elseif x_position == 7
-       Moment_y = (Az*6 - 667.848*0.5);
-       Moment_z = -Ay*6 + -5*Fa + 330.35*0.5;
-       torque = torque_o;
+        %shoulder gear o
+       Moment_y = (Az*6 - 667.848*0.5)
+       Moment_z = -Ay*6 + -5*Fa + 330.35*0.5
+       torque = torque_o
     elseif x_position == 14     
        Moment_y = (Az*6 + (Az + Ft)*7.5);
        Moment_z = -1*Ay*6 - 5*Fa + 7.5*(-1*Ay - weight + Fr);
