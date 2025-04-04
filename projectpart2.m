@@ -61,11 +61,11 @@ function [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter)
        Moment_y = (Az*6 - 667.848*0.5);
        Moment_z = -Ay*6 + -5*Fa + 330.35*0.5;
        torque = torque_o;
-    elseif x_position == 14     
+    elseif x_position == 14.5     
        Moment_y = (Az*6 + (Az + Ft)*7.5);
        Moment_z = -1*Ay*6 - 5*Fa + 7.5*(-1*Ay - weight + Fr);
        torque = torque_o - torque_c;
-    elseif x_position == 14.5
+    elseif x_position == 15
        Moment_y = (Az*6 + (Az + Ft)*7.5) + 0.5*806.86;
        Moment_z = -1*Ay*6 - 5*Fa + 7.5*(-1*Ay - weight + Fr) - 241.10416*0.5; 
        torque = torque_o - torque_c;
@@ -112,8 +112,8 @@ function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt,
     
     q = 1/(1 + root_a_q/sqrt(notch_radius));
     qs = 1/(1 + root_a_qs/sqrt(notch_radius));    
-    kf = 1 + q*(kt - 1)
-    kfs = 1 + qs*(kts - 1)
+    kf = 1 + q*(kt - 1);
+    kfs = 1 + qs*(kts - 1);
 
     ka = 2.7*(Sut/1000)^-0.265;
     ke = 0.753;
@@ -123,9 +123,9 @@ function [safety_factor] = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt,
     end
     
 
-    Se = ka*kb*ke*0.5*Sut
-    SigmaA_ = kf*sigma_x
-    SigmaM_ = kfs*tau_xy*sqrt(3)
+    Se = ka*kb*ke*0.5*Sut;
+    SigmaA_ = kf*sigma_x;
+    SigmaM_ = kfs*tau_xy*sqrt(3);
     safety_factor = 1 / (SigmaM_ / Sut + SigmaA_ / Se);
 end
 
@@ -145,7 +145,7 @@ function dispSafety(label)
     fprintf('-----------------\n');
 end
 
-x_position = 14;
+x_position = 14.5;
 kt = 2.14;
 kts = 3.0;
 diameter = 1.25*master_Dia;
@@ -169,7 +169,7 @@ notch_radius = 0.02*diameter;
 dispSafety("Gear D Keyseat");
 
 
-x_position = 14;
+x_position = 15;
 kt = 1.9;  
 kts = 1.6;
 diameter = 1.25 * master_Dia;
@@ -192,34 +192,9 @@ notch_radius = 0.05*diameter;
 dispSafety("Gear D Shoulder Fillet");
 
 
-% Gear O keyseat
-%Moment_y = Az*6;
-%Moment_z = Ay*6;
-
-% Gear C keyseat
-
-
-%net_moment = sqrt(Moment_y^2 + Moment_z^2);
-%sigma_x = 32*net_moment/(pi*d_0^3);
-%tau = 16*torque_o/(pi*d_0^3);
-%sigma_von_mises = sqrt(sigma_x^2 + 3*tau^2);
-
-%eq = sigma_von_mises == Sy;
-%disp(vpa(solve(eq,power)));
-
-%n = Sy/sigma_von_mises
-
-
-
-
-
-
-if (false)
-
-% Diameter Convergence
-% Calculation----------------------------------------------------------
-% Diameter Convergence Calculation for Gear O Shoulder
-fprintf('\nStarting diameter convergence for Gear O Shoulder...\n');
+if (true)
+% Diameter Convergence Calculation for Gear O Keyseat
+fprintf('\nStarting diameter convergence for Gear O Keyseat...\n');
 global x_position kt kts notch_radius diameter Sy Sut master_Dia;
 convergence_threshold = 1e-6;
 max_iterations = 100;
@@ -229,18 +204,17 @@ target_safety_factor = 2;
 diameter = master_Dia;
 
 % Calculate the initial safety factor dynamically
-x_position = 7;    % Gear O Shoulder
-kt = 2.1;          % Rough Approximation
-kts = 1.625;       % Rough Approximation
-notch_radius = 0.05 * diameter;
+x_position = 6.5;    % Gear O Keyseat
+kt = 2.14;
+kts = 3.0;
+notch_radius = 0.02 * diameter;
 
 % Calculate initial safety factor
 [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter);
 safety_factor = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut, diameter);
-
 fprintf('Initial Diameter: %.4f, Initial Safety Factor: %.4f\n', diameter, safety_factor);
 
-damping_factor = 0.5;  % Damping to smooth the adjustment
+damping_factor = 0.2;  % Damping to smooth the adjustment
 
 % Store values for plotting
 diameters = zeros(1, max_iterations);
@@ -248,11 +222,11 @@ safety_factors = zeros(1, max_iterations);
 iterations = 1:max_iterations;
 
 for i = 1:max_iterations
-    % Set parameters for Gear O Shoulder
-    x_position = 7;
-    kt = 2.1;   % Rough Approximation: Needs to be more accurate
-    kts = 1.625; % Rough Approximation: Needs to be more accurate
-    notch_radius = 0.05 * diameter;
+    % Set parameters for Gear O Keyseat
+    x_position = 6.5;
+    kt = 2.14;
+    kts = 3.0;
+    notch_radius = 0.02 * diameter;
 
     % Calculate safety factor
     [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter);
@@ -294,7 +268,7 @@ subplot(2, 1, 1);
 plot(iterations, diameters, '-o', 'LineWidth', 1.5);
 xlabel('Iteration Number');
 ylabel('Diameter');
-title('Diameter Convergence (Gear O Shoulder)');
+title('Diameter Convergence (Gear O Keyseat)');
 grid on;
 
 % Plot Safety Factor Convergence
@@ -302,6 +276,7 @@ subplot(2, 1, 2);
 plot(iterations, safety_factors, '-o', 'LineWidth', 1.5);
 xlabel('Iteration Number');
 ylabel('Safety Factor');
-title('Safety Factor Convergence (Gear O Shoulder)');
+title('Safety Factor Convergence (Gear O Keyseat)');
 grid on;
+
 end

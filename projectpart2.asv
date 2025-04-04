@@ -1,10 +1,10 @@
 
 clc;
 clear all;
-global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight Sy Sut;
+global Az Ay Ft Fa Fr Lt Lr Pt Pr torque_o torque_c torque_d weight Sy Sut master_Dia;
 
 power = 126769;
-master_Dia = 2.415;
+master_Dia = 1.5;
 
 scaling_factor_gearO = 0.25;
 scaling_factor_gearC = 1;
@@ -15,7 +15,7 @@ r_0 = 5;  %gear 0 radius
 r_d = 10; %gear 0 radius
 r_c = 10; %gear 0 radius
 
-d_0 = 1.5; %dia of shaft at gear o
+d_0 = 1.5; %dia of shaft at gear o (for max power only)
 
 weight = 35;
 N_M_TO_LBF_IN = 8.851;
@@ -170,31 +170,31 @@ dispSafety("Gear D Keyseat");
 
 
 x_position = 14;
-kt = 2.1;  
+kt = 1.9;  
 kts = 1.6;
 diameter = 1.25 * master_Dia;
 notch_radius = 0.05*diameter;
 dispSafety("Gear C Shoulder Fillet");
 
 x_position = 7;
-kt = 2.1; % Rough Approximation: Need to change to be more accurate
+kt = 1.95; % Rough Approximation: Need to change to be more accurate
 kts = 1.625; % Rough Approximation: Need to change to be more accurate
-notch_radius = 0.075;
 diameter = master_Dia;
+notch_radius = 0.05*diameter;
 dispSafety("Gear O Shoulder Fillet");
 
 
 x_position = 19.5;
-kt = 2.05;  % Rough Approximation: Need to change to be more accurate
+kt = 1.9;  % Rough Approximation: Need to change to be more accurate
 kts = 1.6; % Rough Approximation: Need to change to be more accurate
-notch_radius = 0.09375;
 diameter = 1.25 * master_Dia;
+notch_radius = 0.05*diameter;
 dispSafety("Gear D Shoulder Fillet");
 
 
 % Gear O keyseat
-%Moment_y = Az*6;
-%Moment_z = Ay*6;
+Moment_y = Az*6;
+Moment_z = Ay*6;
 
 % Gear C keyseat
 
@@ -209,3 +209,93 @@ dispSafety("Gear D Shoulder Fillet");
 
 %n = Sy/sigma_von_mises
 
+
+
+if (true)
+% Diameter Convergence Calculation for Gear O Keyseat
+fprintf('\nStarting diameter convergence for Gear O Keyseat...\n');
+global x_position kt kts notch_radius diameter Sy Sut master_Dia;
+convergence_threshold = 1e-6;
+max_iterations = 100;
+target_safety_factor = 2;
+
+% Initial diameter guess
+diameter = master_Dia;
+
+% Calculate the initial safety factor dynamically
+x_position = 6.5;    % Gear O Keyseat
+kt = 2.14;
+kts = 3.0;
+notch_radius = 0.02 * diameter;
+
+% Calculate initial safety factor
+[sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter);
+safety_factor = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut, diameter);
+fprintf('Initial Diameter: %.4f, Initial Safety Factor: %.4f\n', diameter, safety_factor);
+
+damping_factor = 0.2;  % Damping to smooth the adjustment
+
+% Store values for plotting
+diameters = zeros(1, max_iterations);
+safety_factors = zeros(1, max_iterations);
+iterations = 1:max_iterations;
+
+for i = 1:max_iterations
+    % Set parameters for Gear O Keyseat
+    x_position = 6.5;
+    kt = 2.14;
+    kts = 3.0;
+    notch_radius = 0.02 * diameter;
+
+    % Calculate safety factor
+    [sigma_x, tau_xy] = return_sigmax_tauxy(x_position, diameter);
+    safety_factor = return_safetyfactor_goodman(sigma_x, tau_xy, kts, kt, notch_radius, Sy, Sut, diameter);
+
+    % Store current values for plotting
+    diameters(i) = diameter;
+    safety_factors(i) = safety_factor;
+
+    % Check convergence
+    if abs(safety_factor - target_safety_factor) < convergence_threshold
+        fprintf('Converged after %d iterations: Diameter = %.4f, Safety Factor = %.4f\n', i, diameter, safety_factor);
+        diameters = diameters(1:i);  % Trim unused elements
+        safety_factors = safety_factors(1:i);
+        iterations = iterations(1:i);
+        break;
+    end
+
+    % Improved adjustment calculation with damping
+    adjustment = 1 + damping_factor * (safety_factor - target_safety_factor) / target_safety_factor;
+    diameter = diameter / adjustment;
+
+    % Display progress
+    fprintf('Iteration %d: Diameter = %.4f, Safety Factor = %.4f\n', i, diameter, safety_factor);
+end
+
+% Final result
+if abs(safety_factor - target_safety_factor) >= convergence_threshold
+    fprintf('Did not converge within %d iterations. Final Diameter = %.4f, Safety Factor = %.4f\n', max_iterations, diameter, safety_factor);
+else
+    fprintf('Final Converged Diameter: %.4f, Safety Factor: %.4f\n', diameter, safety_factor);
+end
+
+% Plot the convergence of diameter and safety factor
+figure;
+
+% Plot Diameter Convergence
+subplot(2, 1, 1);
+plot(iterations, diameters, '-o', 'LineWidth', 1.5);
+xlabel('Iteration Number');
+ylabel('Diameter');
+title('Diameter Convergence (Gear O Keyseat)');
+grid on;
+
+% Plot Safety Factor Convergence
+subplot(2, 1, 2);
+plot(iterations, safety_factors, '-o', 'LineWidth', 1.5);
+xlabel('Iteration Number');
+ylabel('Safety Factor');
+title('Safety Factor Convergence (Gear O Keyseat)');
+grid on;
+
+end
